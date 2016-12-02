@@ -93,7 +93,7 @@ function dataset:__init(...)
 
    -- argcheck
    local args =  initcheck(...)
-   print(args)
+   --print(args)
    for k,v in pairs(args) do self[k] = v end
 
    if not self.loadSize then self.loadSize = self.sampleSize; end
@@ -164,8 +164,8 @@ function dataset:__init(...)
    self.classList = {}                  -- index of imageList to each image of a particular class
    self.classListSample = self.classList -- the main list used when sampling data
 
-   print('running "find" on each class directory, and concatenate all'
-         .. ' those filenames into a single file containing all image paths for a given class')
+   --print('running "find" on each class directory, and concatenate all'
+   --      .. ' those filenames into a single file containing all image paths for a given class')
    -- so, generates one file per class
    local classFindFiles = {}
    for i=1,#self.classes do
@@ -188,7 +188,7 @@ function dataset:__init(...)
    os.execute('bash ' .. tmpfile)
    os.execute('rm -f ' .. tmpfile)
 
-   print('now combine all the files to a single large file')
+   --print('now combine all the files to a single large file')
    local tmpfile = os.tmpname()
    local tmphandle = assert(io.open(tmpfile, 'w'))
    -- concat all finds to a single large file in the order of self.classes
@@ -201,11 +201,11 @@ function dataset:__init(...)
    os.execute('rm -f ' .. tmpfile)
 
    --==========================================================================
-   print('load the large concatenated list of sample paths to self.imagePath')
+   --print('load the large concatenated list of sample paths to self.imagePath')
    local cmd = wc .. " -L '"
                                                   .. combinedFindList .. "' |"
                                                   .. cut .. " -f1 -d' '"
-   print('cmd..' .. cmd)
+   --print('cmd..' .. cmd)
    local maxPathLength = tonumber(sys.fexecute(wc .. " -L '"
                                                   .. combinedFindList .. "' |"
                                                   .. cut .. " -f1 -d' '")) + 1
@@ -220,20 +220,20 @@ function dataset:__init(...)
    for line in io.lines(combinedFindList) do
       ffi.copy(s_data, line)
       s_data = s_data + maxPathLength
-      if self.verbose and count % 10000 == 0 then
-         xlua.progress(count, length)
-      end;
+      --if self.verbose and count % 10000 == 0 then
+      --   xlua.progress(count, length)
+      --end;
       count = count + 1
    end
 
    self.numSamples = self.imagePath:size(1)
-   if self.verbose then print(self.numSamples ..  ' samples found.') end
+   --if self.verbose then print(self.numSamples ..  ' samples found.') end
    --==========================================================================
-   print('Updating classList and imageClass appropriately')
+   --print('Updating classList and imageClass appropriately')
    self.imageClass:resize(self.numSamples)
    local runningIndex = 0
    for i=1,#self.classes do
-      if self.verbose then xlua.progress(i, #(self.classes)) end
+      --if self.verbose then xlua.progress(i, #(self.classes)) end
       local length = tonumber(sys.fexecute(wc .. " -l '"
                                               .. classFindFiles[i] .. "' |"
                                               .. cut .. " -f1 -d' '"))
@@ -248,7 +248,7 @@ function dataset:__init(...)
 
    --==========================================================================
    -- clean up temporary files
-   print('Cleaning up temporary files')
+   --print('Cleaning up temporary files')
    local tmpfilelistall = ''
    for i=1,#(classFindFiles) do
       tmpfilelistall = tmpfilelistall .. ' "' .. classFindFiles[i] .. '"'
@@ -343,12 +343,8 @@ end
 local function tableToOutput(self, dataTable, scalarTable)
    local data, scalarLabels, labels
    local quantity = #scalarTable
---   print(dataTable[1]:())
-   assert(dataTable[1]:dim() == 3)
---   print(quantity)
---   print(self.sampleSize[1])
---   print(self.sampleSize[2])
---   print(self.sampleSize[3])
+   assert(dataTable[1]:dim() == 3, 'Size is incorrect')
+
    data = torch.Tensor(quantity,
 		       self.sampleSize[1], self.sampleSize[2], self.sampleSize[3])
 --	 print(data:size())

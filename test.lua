@@ -38,20 +38,20 @@ opt = {
 -- one-line argument parser. parses enviroment variables to override the defaults
 for k,v in pairs(opt) do opt[k] = tonumber(os.getenv(k)) or os.getenv(k) or opt[k] end
 opt.nThreads = 1 -- test only works with 1 thread...
-print(opt)
+--print(opt)
 if opt.display == 0 then opt.display = false end
 
 opt.manualSeed = torch.random(1, 10000) -- set seed
-print("Random Seed: " .. opt.manualSeed)
+--print("Random Seed: " .. opt.manualSeed)
 torch.manualSeed(opt.manualSeed)
 torch.setdefaulttensortype('torch.FloatTensor')
 
 opt.netG_name = opt.name .. '/' .. opt.which_epoch .. '_net_G'
 
 local data_loader = paths.dofile('data/data.lua')
-print('#threads...' .. opt.nThreads)
+--print('#threads...' .. opt.nThreads)
 local data = data_loader.new(opt.nThreads, opt)
-print("Dataset Size: ", data:size())
+--print("Dataset Size: ", data:size())
 
 -- translation direction
 local idx_A = nil
@@ -72,11 +72,11 @@ end
 local input = torch.FloatTensor(opt.batchSize,3,opt.fineSize,opt.fineSize)
 local target = torch.FloatTensor(opt.batchSize,3,opt.fineSize,opt.fineSize)
 
-print('checkpoints_dir', opt.checkpoints_dir)
+--print('checkpoints_dir', opt.checkpoints_dir)
 local netG = util.load(paths.concat(opt.checkpoints_dir, opt.netG_name .. '.t7'), opt)
 --netG:evaluate()
 
-print(netG)
+--print(netG)
 
 
 function TableConcat(t1,t2)
@@ -93,11 +93,11 @@ opt.how_many=math.min(opt.how_many, data:size())
 
 local filepaths = {} -- paths to images tested on
 for n=1,math.floor(opt.how_many/opt.batchSize) do
-    print('processing batch ' .. n)
+    --print('processing batch ' .. n)
     
     local data_curr, filepaths_curr = data:getBatch()
     filepaths_curr = util.basename_batch(filepaths_curr)
-    print('filepaths_curr: ', filepaths_curr)
+    --print('filepaths_curr: ', filepaths_curr)
     
     input = data_curr[{ {}, idx_A, {}, {} }]
     target = data_curr[{ {}, idx_B, {}, {} }]
@@ -125,16 +125,17 @@ for n=1,math.floor(opt.how_many/opt.batchSize) do
     paths.mkdir(paths.concat(image_dir,'input'))
     paths.mkdir(paths.concat(image_dir,'output'))
     paths.mkdir(paths.concat(image_dir,'target'))
-    print(input:size())
-    print(output:size())
-    print(target:size())
+    --print(input:size())
+    --print(output:size())
+    --print(target:size())
     for i=1, opt.batchSize do
         image.save(paths.concat(image_dir,'input',filepaths_curr[i]), image.scale(input[i],input[i]:size(2),input[i]:size(3)/opt.aspect_ratio))
         image.save(paths.concat(image_dir,'output',filepaths_curr[i]), image.scale(output[i],output[i]:size(2),output[i]:size(3)/opt.aspect_ratio))
         image.save(paths.concat(image_dir,'target',filepaths_curr[i]), image.scale(target[i],target[i]:size(2),target[i]:size(3)/opt.aspect_ratio))
     end
-    print('Saved images to: ', image_dir)
-    
+    --print('Saving: ', paths.concat(image_dir,'input',filepaths_curr[2]))
+    xlua.progress(n, math.floor(opt.how_many/opt.batchSize))
+
     if opt.display then
       if opt.preprocess == 'regular' then
         disp = require 'display'
@@ -142,7 +143,8 @@ for n=1,math.floor(opt.how_many/opt.batchSize) do
         disp.image(util.scaleBatch(output,100,100),{win=opt.display_id+1, title='output'})
         disp.image(util.scaleBatch(target,100,100),{win=opt.display_id+2, title='target'})
         
-        print('Displayed images')
+        --print('Displayed images')
+
       end
     end
     

@@ -32,10 +32,10 @@ function data.new(n, opt_)
                                 local seed = (opt.manualSeed and opt.manualSeed or 0) + idx
                                 torch.manualSeed(seed)
                                 torch.setnumthreads(1)
-                                print(string.format('Starting donkey with id: %d seed: %d', tid, seed))
+                                --print(string.format('Starting donkey with id: %d seed: %d', tid, seed))
                                 assert(options, 'options not found')
                                 assert(opt, 'opt not given')
-                                print(opt)
+                                --print(opt)
                                 paths.dofile(donkey_file)
                              end
     
@@ -75,8 +75,6 @@ function data._pushResult(...)
    end
    result[1] = res
 end
-
-
 
 function data:getBatch()
    -- queue another job

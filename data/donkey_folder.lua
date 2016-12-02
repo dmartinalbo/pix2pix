@@ -17,7 +17,7 @@ paths.dofile('dataset.lua')
 ------------------------------------------
 -------- COMMON CACHES and PATHS
 -- Check for existence of opt.data
-print(os.getenv('DATA_ROOT'))
+--print(os.getenv('DATA_ROOT'))
 opt.data = paths.concat(os.getenv('DATA_ROOT'), opt.phase)
 
 if not paths.dirp(opt.data) then
@@ -25,10 +25,10 @@ if not paths.dirp(opt.data) then
 end
 
 -- a cache file of the training metadata (if doesnt exist, will be created)
-local cache = "cache"
-local cache_prefix = opt.data:gsub('/', '_')
-os.execute('mkdir -p cache')
-local trainCache = paths.concat(cache, cache_prefix .. '_trainCache.t7')
+--local cache = "cache"
+--local cache_prefix = opt.data:gsub('/', '_')
+--os.execute('mkdir -p cache')
+--local trainCache = paths.concat(cache, cache_prefix .. '_trainCache.t7')
 
 --------------------------------------------------------------------------------------------
 local input_nc = opt.input_nc -- input channels
@@ -39,18 +39,22 @@ local sampleSize = {input_nc, opt.fineSize}
 local preprocessAandB = function(imA, imB)
   imA = image.scale(imA, loadSize[2], loadSize[2])
   imB = image.scale(imB, loadSize[2], loadSize[2])
-  local perm = torch.LongTensor{3, 2, 1}
-  imA = imA:index(1, perm)--:mul(256.0): brg, rgb
-  imA = imA:mul(2):add(-1)
-  imB = imB:index(1, perm)
-  imB = imB:mul(2):add(-1)
+  if input_nc == 3 then
+    local perm = torch.LongTensor{3, 2, 1}
+    imA = imA:index(1, perm)--:mul(256.0): brg, rgb
+    imA = imA:mul(2):add(-1)
+    imB = imB:index(1, perm)
+    imB = imB:mul(2):add(-1)
+  elseif input_nc == 1 then
+    imA = imA:mul(2):add(-1)
+    imB = imB:mul(2):add(-1)
+  end
 --   print(img:size())
   assert(imA:max()<=1,"A: badly scaled inputs")
   assert(imA:min()>=-1,"A: badly scaled inputs")
   assert(imB:max()<=1,"B: badly scaled inputs")
   assert(imB:min()>=-1,"B: badly scaled inputs")
  
-  
   local oW = sampleSize[2]
   local oH = sampleSize[2]
   local iH = imA:size(2)
@@ -118,15 +122,27 @@ end
 
 --local function loadImage
 
-local function loadImage(path)
-   local input = image.load(path, 3, 'float')
-   local h = input:size(2)
-   local w = input:size(3)
+-- local function loadImage(path)
+--    local input = image.load(path, 3, 'float')
+--    local h = input:size(2)
+--    local w = input:size(3)
 
-   local imA = image.crop(input, 0, 0, w/2, h)
-   local imB = image.crop(input, w/2, 0, w, h)
+--    local imA = image.crop(input, 0, 0, w/2, h)
+--    local imB = image.crop(input, w/2, 0, w, h)
    
-   return imA, imB
+--    return imA, imB
+-- end
+
+local function loadImage(path, input_nc)
+  assert(input_nc ~= 1 or input_nc ~=3, 'Incorrect input channel number')
+  local input = image.load(path, input_nc, 'float')
+  local h = input:size(2)
+  local w = input:size(3)
+
+  local imA = image.crop(input, 0, 0, w/2, h)
+  local imB = image.crop(input, w/2, 0, w, h)
+
+  return imA, imB
 end
 
 -- channel-wise mean and std. Calculate or load them from disk later in the script.
@@ -155,7 +171,7 @@ end
 
 --------------------------------------
 -- trainLoader
-print('trainCache', trainCache)
+--print('trainCache', trainCache)
 --if paths.filep(trainCache) then
 --   print('Loading train metadata from cache')
 --   trainLoader = torch.load(trainCache)
@@ -165,9 +181,9 @@ print('trainCache', trainCache)
 --   trainLoader.serial_batches = opt.serial_batches
 --   trainLoader.split = 100
 --else
-print('Creating train metadata')
+--print('Creating train metadata')
 --   print(opt.data)
-print('serial batch:, ', opt.serial_batches)
+--print('serial batch:, ', opt.serial_batches)
 trainLoader = dataLoader{
     paths = {opt.data},
     loadSize = {input_nc, loadSize[2], loadSize[2]},
