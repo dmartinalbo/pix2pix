@@ -24,6 +24,7 @@ function data.new(n, opt_)
 --   print('n..' .. n)
    if n > 0 then
       local options = opt_
+      local phase = phase_
       self.threads = Threads(n,
                              function() require 'torch' end,
                              function(idx)
@@ -78,31 +79,17 @@ end
 
 function data:getBatch()
    -- queue another job
---   print(self.threads)
    self.threads:addjob(self._getFromThreads, self._pushResult)
    self.threads:dojob()
    local res = result[1]
---   print(res)
---   print('result')
---   print(res)
---   os.exit()
---   paths = results[3]
---   print(paths)
    
    img_data = res[1]
-   img_paths =  res[3]
---   print(img_data:size())
---   print(type(img_data))
---   print(img_paths)
---   print(type(img_paths))
---   result[3] = nil
---   print(type(res))
+   img_paths = res[3]
 
    result[1] = nil
    if torch.type(img_data) == 'table' then
       img_data = unpack(img_data)
    end
-
 
    return img_data, img_paths
 end

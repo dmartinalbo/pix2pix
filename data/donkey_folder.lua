@@ -32,7 +32,7 @@ end
 
 --------------------------------------------------------------------------------------------
 local input_nc = opt.input_nc -- input channels
-local output_nc = opt.output_nc
+local output_nc = opt.input_nc
 local loadSize   = {input_nc, opt.loadSize}
 local sampleSize = {input_nc, opt.fineSize}
 
@@ -79,8 +79,6 @@ local preprocessAandB = function(imA, imB)
   
   return imA, imB
 end
-
-
 
 local function loadImageChannel(path)
     local input = image.load(path, 3, 'float')

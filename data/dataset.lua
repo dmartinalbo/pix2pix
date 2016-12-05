@@ -369,13 +369,7 @@ function dataset:sample(quantity)
       table.insert(dataTable, out)
       table.insert(scalarTable, class)
       samplePaths[i] = imgpath
---      print(imgpath)
---      table.insert(pathTable, imgpath)
---      table.insert()
---      print('out', out:size())
    end
---   print('table')
---   print(table)
    local data, scalarLabels = tableToOutput(self, dataTable, scalarTable)
    return data, scalarLabels, samplePaths-- filePaths
 end
