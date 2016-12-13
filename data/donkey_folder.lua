@@ -11,12 +11,12 @@
 ]]--
 
 require 'image'
-local log = require 'log'
+--local log = require 'log'
 paths.dofile('dataset.lua')
 -- This file contains the data-loading logic and details.
 -- It is run by each data-loader thread.
 if not paths.dirp(opt.data) then
-  log.error('Did not find directory: ' .. opt.data)
+  laia.log.error('Did not find directory: ' .. opt.data)
 end
 
 -- a cache file of the training metadata (if doesnt exist, will be created)

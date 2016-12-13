@@ -190,11 +190,11 @@ end
 
 -- TO DO: loading code is rather hacky; clean it up and make sure it works on all types of nets / cpu/gpu configurations
 function util.load(filename, opt)
-  if opt.cudnn>0 then
+  if opt.cudnn then
   require 'cudnn'
   end
   local net = torch.load(filename)
-  if opt.gpu > 0 then
+  if opt.gpu >= 0 then
   require 'cunn'
   net:cuda()
   
