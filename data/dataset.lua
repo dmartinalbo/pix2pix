@@ -358,20 +358,21 @@ end
 
 -- sampler, samples from the training set.
 function dataset:sample(quantity)
-   assert(quantity)
-   local dataTable = {}
-   local scalarTable = {}
-   local samplePaths = {}
-   for i=1,quantity do
-      local class = torch.random(1, #self.classes)
---      print(class)
-      local out, imgpath = self:getByClass(class)
-      table.insert(dataTable, out)
-      table.insert(scalarTable, class)
-      samplePaths[i] = imgpath
-   end
-   local data, scalarLabels = tableToOutput(self, dataTable, scalarTable)
-   return data, scalarLabels, samplePaths-- filePaths
+  assert(quantity)
+  local dataTable = {}
+  local scalarTable = {}
+  local samplePaths = {}
+  for i=1,quantity do
+    local class = torch.random(1, #self.classes)
+    --      print(class)
+    local out, imgpath = self:getByClass(class)
+    table.insert(dataTable, out)
+    table.insert(scalarTable, class)
+    samplePaths[i] = imgpath
+  end
+
+  local data, scalarLabels = tableToOutput(self, dataTable, scalarTable)
+  return data, scalarLabels, samplePaths-- filePaths
 end
 
 function dataset:get(i1, i2)
