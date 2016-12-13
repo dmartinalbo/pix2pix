@@ -99,7 +99,7 @@ opt.display_freq = 10
 opt.display_id = 10
 opt.save_epoch_freq = 10
 
-print(opt)
+--print(opt)
 
 -- Load initial checkpoint
 laia.log.info('Loading models from %s', opt.checkpoint)
@@ -392,7 +392,7 @@ while opt.max_epochs <= 0 or epoch < opt.max_epochs do
   epoch = epoch + 1
 
   local train_loss_l1_epoch, train_duration_epoch = train_epoch()
-  --local valid_loss_l1_epoch, valid_duration_epoch = valid_epoch()
+  local valid_loss_l1_epoch, valid_duration_epoch = valid_epoch()
   
   parametersD, gradParametersD = nil, nil -- nil them to avoid spiking memory
   parametersG, gradParametersG = nil, nil
@@ -407,25 +407,25 @@ while opt.max_epochs <= 0 or epoch < opt.max_epochs do
   --   end
   -- end
 
-  -- Saving stuff  
-  if best_model then
-    best_criterion_value = curr_crit_value
-    best_criterion_epoch = epoch
-    local checkpoint = {}
-    checkpoint.model_opt = initial_checkpoint.model_opt
-    checkpoint.train_opt = opt       -- Original training options
-    checkpoint.epoch     = epoch
-    checkpoint.modelG    = modelG
-    checkpoint.modelD    = modelD
-    -- Current RNG state
-    --checkpoint.rng_state = 
-    -- Current rmsprop options (i.e. current learning rate)
-    --checkpoint.rmsprop   = rmsprop_opts
-    modelG:clearState()
-    modelD:clearState()
-    -- Only save t7 checkpoint if there is an improvement in L1 loss
-    torch.save(output_model_filename, checkpoint)
-  end
+  -- -- Saving stuff  
+  -- if best_model then
+  --   best_criterion_value = curr_crit_value
+  --   best_criterion_epoch = epoch
+  --   local checkpoint = {}
+  --   checkpoint.model_opt = initial_checkpoint.model_opt
+  --   checkpoint.train_opt = opt       -- Original training options
+  --   checkpoint.epoch     = epoch
+  --   checkpoint.modelG    = modelG
+  --   checkpoint.modelD    = modelD
+  --   -- Current RNG state
+  --   --checkpoint.rng_state = 
+  --   -- Current rmsprop options (i.e. current learning rate)
+  --   --checkpoint.rmsprop   = rmsprop_opts
+  --   modelG:clearState()
+  --   modelD:clearState()
+  --   -- Only save t7 checkpoint if there is an improvement in L1 loss
+  --   torch.save(output_model_filename, checkpoint)
+  -- end
   
   -- Print progress of the loss function
   if output_progress_file ~= nil then
