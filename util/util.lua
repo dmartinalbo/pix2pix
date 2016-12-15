@@ -85,8 +85,6 @@ function util.deprocess_batch(batch)
   return batch
 end
 
-
-
 -- preprocessing specific to colorization
 
 function util.deprocessLAB(L, AB)
@@ -186,35 +184,69 @@ function util.loadImage(path, loadSize, nc)
   return input 
 end
 
-
-
--- TO DO: loading code is rather hacky; clean it up and make sure it works on all types of nets / cpu/gpu configurations
-function util.load(filename, opt)
-  if opt.cudnn then
-  require 'cudnn'
+function util.loadCheckpoint(opt)
+  local checkpoint = torch.load(opt.checkpoint)
+  if opt.gpu > 0 then
+    require 'cunn'
+    checkpoint.last.modelG = util.preprocessModel(checkpoint.last.modelG, opt.gpu, opt.cudnn)
+    checkpoint.last.modelD = util.preprocessModel(checkpoint.last.modelD, opt.gpu, opt.cudnn)
+    checkpoint.best.modelG = checkpoint.last.modelG
+    checkpoint.best.modelD = checkpoint.last.modelD
   end
-  local net = torch.load(filename)
-  if opt.gpu >= 0 then
-  require 'cunn'
-  net:cuda()
-  
-  -- calling cuda on cudnn saved nngraphs doesn't change all variables to cuda, so do it below
-  if net.forwardnodes then
-    for i=1,#net.forwardnodes do
-    if net.forwardnodes[i].data.module then
-      net.forwardnodes[i].data.module:cuda()
-    end
-    end
-  end
-  
-  else
-  net:float()
-  end
-  net:apply(function(m) if m.weight then 
-    m.gradWeight = m.weight:clone():zero(); 
-    m.gradBias = m.bias:clone():zero(); end end)
-  return net
+  return checkpoint
 end
+
+
+function util.preprocessModel(model, gpu, cudnn)
+  if gpu then
+    model:cuda()
+    -- calling cuda on cudnn saved nngraphs doesn't change 
+    -- all variables to cuda, so do it below
+    if model.forwardnodes then
+      for i=1,#model.forwardnodes do
+        if model.forwardnodes[i].data.module then
+          model.forwardnodes[i].data.module:cuda()
+        end
+      end
+    end
+    if cudnn then
+    model = util.cudnn(model)
+    end
+  end
+  model:apply(function(m) if m.weight then 
+    m.gradWeight = m.weight:clone():zero(); 
+    m.gradBias = m.bias:clone():zero(); end end
+  )
+  return model
+end
+
+-- -- TO DO: loading code is rather hacky; clean it up and make sure it works on all types of nets / cpu/gpu configurations
+-- function util.load(filename, opt)
+--   if opt.cudnn then
+--     require 'cudnn'
+--   end
+--   local net = torch.load(filename)
+--   if opt.gpu > 0 then
+--     require 'cunn'
+--     net:cuda()
+
+--     -- calling cuda on cudnn saved nngraphs doesn't change all variables to cuda, so do it below
+--     if net.forwardnodes then
+--       for i=1,#net.forwardnodes do
+--         if net.forwardnodes[i].data.module then
+--           net.forwardnodes[i].data.module:cuda()
+--         end
+--       end
+--     end
+--   else
+--     net:float()
+--   end
+--   net:apply(function(m) if m.weight then 
+--     m.gradWeight = m.weight:clone():zero(); 
+--     m.gradBias = m.bias:clone():zero(); end end
+--   )
+--   return net
+-- end
 
 function util.cudnn(net)
   require 'cudnn'

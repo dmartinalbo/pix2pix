@@ -147,15 +147,15 @@ local mean,std
 -- function to load the image, jitter it appropriately (random crops etc.)
 local trainHook = function(self, path)
   collectgarbage()
-  if opt.preprocess == 'regular' then
-    local imA, imB = loadImage(path)
-    imA, imB = preprocessAandB(imA, imB)
-    imAB = torch.cat(imA, imB, 1)
-  end
+--  if opt.preprocess == 'regular' then
+  local imA, imB = loadImage(path)
+  imA, imB = preprocessAandB(imA, imB)
+  imAB = torch.cat(imA, imB, 1)
+--  end
 
-  if opt.preprocess == 'colorization' then 
-    imAB = loadImageChannel(path)
-  end
+  -- if opt.preprocess == 'colorization' then 
+  --   imAB = loadImageChannel(path)
+  -- end
   return imAB
 end
 

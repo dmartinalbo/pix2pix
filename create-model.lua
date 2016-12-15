@@ -123,8 +123,14 @@ discriminator:float()
 
 -- Save models to disk
 local checkpoint = {
-  modelG = generator,
-  modelD = discriminator,
+  best = {
+    modelG = generator,
+    modelD = discriminator
+  },
+  last = {
+    modelG = generator,
+    modelD = discriminator
+  },
   model_opt = opt 
 }
 
@@ -132,8 +138,7 @@ local pg, _ = generator:getParameters()
 local pd, _ = discriminator:getParameters()
 laia.log.info('\n' .. generator:__tostring__())
 laia.log.info('\n' .. discriminator:__tostring__())
---laia.log.info('Saved model with %d parameters to %q',
---        p:nElement(), opt.output_file)
+
 laia.log.info('Saved models to %q', opt.output_file)
 
 torch.save(opt.output_file, checkpoint)
